@@ -16,6 +16,8 @@ public interface CategoriaService {
 
 	public void rimuovi(Categoria categoriaInstance) throws Exception;
 
+	public Categoria caricaCategoriaConArticoli(Long id) throws Exception;
+
 	// per injection
 	public void setCategoriaDAO(CategoriaDAO categoriaDAO);
 }

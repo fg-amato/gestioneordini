@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import it.prova.gestioneordini.dao.EntityManagerUtil;
 import it.prova.gestioneordini.dao.OrdineDAO;
 import it.prova.gestioneordini.exceptions.OrdineConArticoliException;
+import it.prova.gestioneordini.model.Articolo;
 import it.prova.gestioneordini.model.Ordine;
 
 public class OrdineServiceImpl implements OrdineService {
@@ -146,6 +147,39 @@ public class OrdineServiceImpl implements OrdineService {
 			return ordineDAO.findByIdFetchingArticolo(id);
 
 		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
+	@Override
+	public void aggiungiArticoloAdOrdine(Ordine ordineEsistente, Articolo articoloInstance) throws Exception {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// questo è come il MyConnection.getConnection()
+			entityManager.getTransaction().begin();
+
+			// uso l'injection per il dao
+			ordineDAO.setEntityManager(entityManager);
+
+			// 'attacco' alla sessione di hibernate i due oggetti
+			// così jpa capisce che se è già presente quel ruolo non deve essere inserito
+			ordineEsistente = entityManager.merge(ordineEsistente);
+			articoloInstance = entityManager.merge(articoloInstance);
+
+			ordineEsistente.getArticoli().add(articoloInstance);
+			// l'update non viene richiamato a mano in quanto
+			// risulta automatico, infatti il contesto di persistenza
+			// rileva che utenteEsistente ora è dirty vale a dire che una sua
+			// proprieta ha subito una modifica (vale anche per i Set ovviamente)
+
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
 			e.printStackTrace();
 			throw e;
 		} finally {

@@ -16,6 +16,8 @@ public interface ArticoloService {
 
 	public void rimuovi(Articolo articoloInstance) throws Exception;
 
+	public Articolo caricaArticoloConCategorie(Long id) throws Exception;
+
 	// per injection
 	public void setArticoloDAO(ArticoloDAO articoloDAO);
 }

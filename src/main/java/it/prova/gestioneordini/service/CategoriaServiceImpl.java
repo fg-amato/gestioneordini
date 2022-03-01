@@ -94,4 +94,24 @@ public class CategoriaServiceImpl implements CategoriaService {
 		this.categoriaDAO = categoriaDAO;
 	}
 
+	@Override
+	public Categoria caricaCategoriaConArticoli(Long id) throws Exception {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// uso l'injection per il dao
+			categoriaDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			return categoriaDAO.findByIdFetchingArticoli(id);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
 }
