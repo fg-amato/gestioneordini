@@ -3,6 +3,7 @@ package it.prova.gestioneordini.model;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -146,8 +147,7 @@ public class Articolo {
 	@Override
 	public String toString() {
 		return "Articolo [id=" + id + ", descrizione=" + descrizione + ", numeroSeriale=" + numeroSeriale
-				+ ", prezzoSingolo=" + prezzoSingolo + ", dataInserimento=" + dataInserimento + ", ordine=" + ordine
-				+ ", createDateTime=" + createDateTime + ", updateDateTime=" + updateDateTime + "]";
+				+ ", prezzoSingolo=" + prezzoSingolo + ", dataInserimento=" + dataInserimento + "]";
 	}
 
 	public void addToCategorie(Categoria categoriaInstance) {
@@ -159,4 +159,22 @@ public class Articolo {
 		this.categorie.remove(categoriaInstance);
 		categoriaInstance.getArticoli().remove(this);
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(dataInserimento, descrizione, id, numeroSeriale, prezzoSingolo);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Articolo))
+			return false;
+		Articolo other = (Articolo) obj;
+		return Objects.equals(dataInserimento, other.dataInserimento) && Objects.equals(descrizione, other.descrizione)
+				&& Objects.equals(id, other.id) && Objects.equals(numeroSeriale, other.numeroSeriale)
+				&& prezzoSingolo == other.prezzoSingolo;
+	}
+
 }

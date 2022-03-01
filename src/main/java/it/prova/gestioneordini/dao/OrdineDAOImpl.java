@@ -56,7 +56,8 @@ public class OrdineDAOImpl implements OrdineDAO {
 		TypedQuery<Ordine> query = entityManager.createQuery(
 				"select o FROM Ordine o left join fetch o.articoli a where o.id = :idOrdine", Ordine.class);
 		query.setParameter("idOrdine", id);
-		return query.getResultList().stream().findFirst().orElse(null);
+		List<Ordine> result = query.getResultList();
+		return result.size()==1?result.get(0):null;
 	}
 
 }

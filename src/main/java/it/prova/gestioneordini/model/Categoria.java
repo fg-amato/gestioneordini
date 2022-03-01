@@ -2,6 +2,7 @@ package it.prova.gestioneordini.model;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -94,6 +95,22 @@ public class Categoria {
 
 	public void setArticoli(Set<Articolo> articoli) {
 		this.articoli = articoli;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(articoli, codice, descrizione, id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Categoria))
+			return false;
+		Categoria other = (Categoria) obj;
+		return Objects.equals(articoli, other.articoli) && Objects.equals(codice, other.codice)
+				&& Objects.equals(descrizione, other.descrizione) && Objects.equals(id, other.id);
 	}
 
 }

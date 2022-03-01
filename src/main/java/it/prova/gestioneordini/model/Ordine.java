@@ -3,6 +3,7 @@ package it.prova.gestioneordini.model;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -120,8 +121,24 @@ public class Ordine {
 	@Override
 	public String toString() {
 		return "Ordine [id=" + id + ", nomeDestinatario=" + nomeDestinatario + ", indirizzoSpedizione="
-				+ indirizzoSpedizione + ", dataSpedizione=" + dataSpedizione + ", createDateTime=" + createDateTime
-				+ ", updateDateTime=" + updateDateTime + "]";
+				+ indirizzoSpedizione + ", dataSpedizione=" + dataSpedizione + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(dataSpedizione, id, indirizzoSpedizione, nomeDestinatario);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Ordine))
+			return false;
+		Ordine other = (Ordine) obj;
+		return this.dataSpedizione.getTime() == other.getDataSpedizione().getTime() && Objects.equals(id, other.id)
+				&& Objects.equals(indirizzoSpedizione, other.indirizzoSpedizione)
+				&& Objects.equals(nomeDestinatario, other.nomeDestinatario);
 	}
 
 }

@@ -124,6 +124,7 @@ public class OrdineServiceImpl implements OrdineService {
 			entityManager.getTransaction().commit();
 
 		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
 			e.printStackTrace();
 			throw e;
 		}

@@ -1,8 +1,8 @@
 package it.prova.gestioneordini.test;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import it.prova.gestioneordini.dao.EntityManagerUtil;
 import it.prova.gestioneordini.exceptions.OrdineConArticoliException;
@@ -31,6 +31,7 @@ public class TestGestioneOrdini {
 					"Nella tabella articolo ci sono: " + articoloServiceInstance.listAll().size() + " elementi");
 
 			testRimozioneOrdine(ordineServiceInstance, articoloServiceInstance);
+			testRimozioneOrdineConEccezione(ordineServiceInstance, articoloServiceInstance);
 
 			System.out.println("Nella tabella ordine ci sono: " + ordineServiceInstance.listAll().size() + " elementi");
 
@@ -38,11 +39,15 @@ public class TestGestioneOrdini {
 					"Nella tabella articolo ci sono: " + articoloServiceInstance.listAll().size() + " elementi");
 
 			testCollegaArticoloAOrdineEsistente(articoloServiceInstance, ordineServiceInstance);
+
 			System.out.println("Nella tabella ordine ci sono: " + ordineServiceInstance.listAll().size() + " elementi");
 
 			System.out.println(
 					"Nella tabella articolo ci sono: " + articoloServiceInstance.listAll().size() + " elementi");
 
+			testUpdateOrdine(ordineServiceInstance);
+
+			System.out.println("Nella tabella ordine ci sono: " + ordineServiceInstance.listAll().size() + " elementi");
 		} catch (Throwable e) {
 			e.printStackTrace();
 		} finally {
@@ -71,31 +76,42 @@ public class TestGestioneOrdini {
 		Ordine ordineNuovo = new Ordine("Luca Rossi", "Via Torino 59",
 				new SimpleDateFormat("dd-MM-yyyy").parse("19-02-2022"));
 		ordineServiceInstance.inserisciNuovo(ordineNuovo);
-		if (ordineNuovo.getId() == null)
+		if (ordineNuovo.getId() == null) {
 			throw new RuntimeException("testRimozioneOrdine FAILED ");
-
-		Ordine ordineCheGeneraEccezione = new Ordine("Mister Eccezione", "Via delle eccezioni 123",
-				new SimpleDateFormat("dd-MM-yyyy").parse("20-12-2021"));
+		}
 
 		Long idOrdineNuovo = ordineNuovo.getId();
 
 		ordineServiceInstance.rimuovi(ordineNuovo);
+
 		if (ordineServiceInstance.caricaSingoloElemento(idOrdineNuovo) != null) {
 			throw new RuntimeException("testRimozioneOrdine FAILED: ordine non rimosso");
 		}
 
+		System.out.println(".......testRimozioneOrdine fine: PASSED.............");
+	}
+
+	private static void testRimozioneOrdineConEccezione(OrdineService ordineServiceInstance,
+			ArticoloService articoloServiceInstance) throws Exception {
+		System.out.println(".......testRimozioneOrdineConEccezione inizio.............");
+
+		Ordine ordineCheGeneraEccezione = new Ordine("Mister Eccezione", "Via delle eccezioni 123",
+				new SimpleDateFormat("dd-MM-yyyy").parse("20-12-2021"));
 		ordineServiceInstance.inserisciNuovo(ordineCheGeneraEccezione);
+		if (ordineCheGeneraEccezione.getId() == null)
+			throw new RuntimeException("testRimozioneOrdineConEccezione FAILED: ordine non inserito ");
 
 		Articolo articolo = new Articolo("Oggetto eccezionale", "EXP123", 200,
-				new SimpleDateFormat("dd-MM-yyyy").parse("18-06-2021"));
-		articolo.setOrdine(ordineCheGeneraEccezione);
+				new SimpleDateFormat("dd-MM-yyyy").parse("18-06-2021"), ordineCheGeneraEccezione);
 
 		articoloServiceInstance.inserisciNuovo(articolo);
-
-		if (ordineCheGeneraEccezione.getId() == null)
-			throw new RuntimeException("testRimozioneOrdine FAILED ");
 		if (articolo.getId() == null)
-			throw new RuntimeException("testRimozioneOrdine FAILED, articolo non inserito nel DB");
+			throw new RuntimeException("testRimozioneOrdineConEccezione FAILED, articolo non inserito nel DB");
+
+		Ordine ordineReloaded = ordineServiceInstance.caricaOrdineConArticoli(ordineCheGeneraEccezione.getId());
+
+		System.out.println(ordineReloaded.getArticoli().size());
+
 		try {
 			ordineServiceInstance.rimuovi(ordineCheGeneraEccezione);
 			throw new RuntimeException("Non doveva arrivare qui");
@@ -103,7 +119,7 @@ public class TestGestioneOrdini {
 
 		}
 
-		System.out.println(".......testRimozioneOrdine fine: PASSED.............");
+		System.out.println(".......testRimozioneOrdineConEccezione fine: PASSED.............");
 	}
 
 	private static void testCollegaArticoloAOrdineEsistente(ArticoloService articoloServiceInstance,
@@ -129,4 +145,23 @@ public class TestGestioneOrdini {
 		System.out.println(".......testCollegaOrdineAArticoloEsistente fine: PASSED.............");
 	}
 
+	private static void testUpdateOrdine(OrdineService ordineServiceInstance) throws Exception {
+		System.out.println(".......testUpdateOrdine inizio.............");
+
+		// mi creo un ordine inserendolo direttamente su db
+		Ordine ordineNuovo = new Ordine("mario.bianchi", "Via Bianchi 38",
+				new SimpleDateFormat("dd-MM-yyyy").parse("18-07-2021"));
+		ordineServiceInstance.inserisciNuovo(ordineNuovo);
+		if (ordineNuovo.getId() == null)
+			throw new RuntimeException("testUpdateOrdine FAILED, ordine non inserito ");
+
+		ordineNuovo.setDataSpedizione(new SimpleDateFormat("dd-MM-yyyy").parse("01-01-2001"));
+		ordineNuovo.setNomeDestinatario("Ciccio Pasticcio");
+		ordineServiceInstance.aggiorna(ordineNuovo);
+		Ordine ordineReloaded = ordineServiceInstance.caricaOrdineConArticoli(ordineNuovo.getId());
+		if (!ordineReloaded.equals(ordineNuovo))
+			throw new RuntimeException("testUpdateOrdine FAILED, i due oggetti sono diversi");
+
+		System.out.println(".......testUpdateOrdine fine: PASSED.............");
+	}
 }
