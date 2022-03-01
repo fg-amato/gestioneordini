@@ -1,0 +1,156 @@
+package it.prova.gestioneordini.service;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import it.prova.gestioneordini.dao.EntityManagerUtil;
+import it.prova.gestioneordini.dao.OrdineDAO;
+import it.prova.gestioneordini.exceptions.OrdineConArticoliException;
+import it.prova.gestioneordini.model.Ordine;
+
+public class OrdineServiceImpl implements OrdineService {
+	private OrdineDAO ordineDAO;
+
+	@Override
+	public List<Ordine> listAll() throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// uso l'injection per il dao
+			ordineDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			return ordineDAO.list();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
+	@Override
+	public Ordine caricaSingoloElemento(Long id) throws Exception {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// uso l'injection per il dao
+			ordineDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			return ordineDAO.get(id);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
+	@Override
+	public void aggiorna(Ordine ordineInstance) throws Exception {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// questo è come il MyConnection.getConnection()
+			entityManager.getTransaction().begin();
+
+			// uso l'injection per il dao
+			ordineDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			ordineDAO.update(ordineInstance);
+
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
+	@Override
+	public void inserisciNuovo(Ordine ordineInstance) throws Exception {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// questo è come il MyConnection.getConnection()
+			entityManager.getTransaction().begin();
+
+			// uso l'injection per il dao
+			ordineDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			ordineDAO.insert(ordineInstance);
+
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
+	@Override
+	public void rimuovi(Ordine ordineInstance) throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+		try {
+
+			entityManager.getTransaction().begin();
+
+			// inietto la connection nel dao
+			ordineDAO.setEntityManager(entityManager);
+
+			Ordine ordineDaRimuovereConArticoli = ordineDAO.findByIdFetchingArticolo(ordineInstance.getId());
+
+			if (ordineDaRimuovereConArticoli.getArticoli().size() > 0) {
+				throw new OrdineConArticoliException(
+						"Stai provando ad eliminare un ordine che ha ancora articoli al suo interno");
+			}
+			// eseguo quello che realmente devo fare
+			ordineDAO.delete(ordineInstance);
+
+			entityManager.getTransaction().commit();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	@Override
+	public void setOrdineDAO(OrdineDAO ordineDAO) {
+		this.ordineDAO = ordineDAO;
+	}
+
+	@Override
+	public Ordine caricaOrdineConArticoli(Long id) throws Exception {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// uso l'injection per il dao
+			ordineDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			return ordineDAO.findByIdFetchingArticolo(id);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
+}

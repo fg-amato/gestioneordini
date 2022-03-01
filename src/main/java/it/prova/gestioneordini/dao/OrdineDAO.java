@@ -4,4 +4,6 @@ import it.prova.gestioneordini.model.Ordine;
 
 public interface OrdineDAO extends IBaseDAO<Ordine> {
 
+	Ordine findByIdFetchingArticolo(Long id) throws Exception;
+
 }

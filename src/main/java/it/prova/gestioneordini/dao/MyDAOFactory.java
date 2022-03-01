@@ -13,7 +13,7 @@ public class MyDAOFactory {
 		return CATEGORIA_DAO_INSTANCE;
 	}
 
-	public static ArticoloDAO getRuoloDAOInstance() {
+	public static ArticoloDAO getArticoloDAOInstance() {
 		if (ARTICOLO_DAO_INSTANCE == null)
 			ARTICOLO_DAO_INSTANCE = new ArticoloDAOImpl();
 		return ARTICOLO_DAO_INSTANCE;
