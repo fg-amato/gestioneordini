@@ -7,6 +7,7 @@ public class MyServiceFactory {
 	// rendiamo questo factory SINGLETON
 	private static OrdineService ORDINE_SERVICE_INSTANCE;
 	private static ArticoloService ARTICOLO_SERVICE_INSTANCE;
+	private static CategoriaService CATEGORIA_SERVICE_INSTANCE;
 
 	public static OrdineService getOrdineServiceInstance() {
 		if (ORDINE_SERVICE_INSTANCE == null)
@@ -22,6 +23,14 @@ public class MyServiceFactory {
 
 		ARTICOLO_SERVICE_INSTANCE.setArticoloDAO(MyDAOFactory.getArticoloDAOInstance());
 		return ARTICOLO_SERVICE_INSTANCE;
+	}
+
+	public static CategoriaService getCategoriaServiceInstance() {
+		if (CATEGORIA_SERVICE_INSTANCE == null)
+			CATEGORIA_SERVICE_INSTANCE = new CategoriaServiceImpl();
+
+		CATEGORIA_SERVICE_INSTANCE.setCategoriaDAO(MyDAOFactory.getCategoriaDAOInstance());
+		return CATEGORIA_SERVICE_INSTANCE;
 	}
 
 }

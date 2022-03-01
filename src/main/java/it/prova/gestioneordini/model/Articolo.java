@@ -37,8 +37,7 @@ public class Articolo {
 	@Column(name = "datainserimento")
 	private Date dataInserimento;
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "ordine_id")
-	@Column(nullable = false)
+	@JoinColumn(name = "ordine_id", nullable = false)
 	private Ordine ordine;
 
 	// campi per le time info del record
