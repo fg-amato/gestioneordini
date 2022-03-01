@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 
 import it.prova.gestioneordini.dao.ArticoloDAO;
 import it.prova.gestioneordini.dao.EntityManagerUtil;
+import it.prova.gestioneordini.exceptions.ArticoloNonAssociatoAOrdineException;
 import it.prova.gestioneordini.model.Articolo;
 
 public class ArticoloServiceImpl implements ArticoloService {
@@ -58,8 +59,32 @@ public class ArticoloServiceImpl implements ArticoloService {
 
 	@Override
 	public void inserisciNuovo(Articolo articoloInstance) throws Exception {
-		// TODO Auto-generated method stub
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
 
+		try {
+			// questo è come il MyConnection.getConnection()
+			entityManager.getTransaction().begin();
+
+			// uso l'injection per il dao
+			articoloDAO.setEntityManager(entityManager);
+
+			if (articoloInstance.getOrdine() == null || articoloInstance.getOrdine().getId() == null) {
+				throw new ArticoloNonAssociatoAOrdineException(
+						"L'articolo che stai cercando di inserire non è associato ad un ordine presente nel DB");
+			}
+
+			// eseguo quello che realmente devo fare
+			articoloDAO.insert(articoloInstance);
+
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
 	}
 
 	@Override
