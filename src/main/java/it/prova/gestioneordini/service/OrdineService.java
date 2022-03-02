@@ -29,6 +29,8 @@ public interface OrdineService {
 
 	public List<Categoria> trovaCategorieDistinteDegliArticoliDiUnOrdine(Ordine ordineEsistente) throws Exception;
 
+	public Ordine trovaIlPiuRecenteOrdineDiUnaCategoria(Categoria categoriaInput) throws Exception;
+
 	public List<Ordine> trovaTuttiGliOrdiniChePossiedonoUnArticoloAventeCategoria(Categoria categoriaInput)
 			throws Exception;
 

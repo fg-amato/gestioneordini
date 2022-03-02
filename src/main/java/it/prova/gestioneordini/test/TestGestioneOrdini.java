@@ -118,6 +118,8 @@ public class TestGestioneOrdini {
 			testCalcolaCostoTotaleDataCategoria(articoloServiceInstance, categoriaServiceInstance,
 					ordineServiceInstance);
 
+			testOrdinePiuRecenteByCategoria(articoloServiceInstance, categoriaServiceInstance, ordineServiceInstance);
+
 		} catch (Throwable e) {
 			e.printStackTrace();
 		} finally {
@@ -587,6 +589,60 @@ public class TestGestioneOrdini {
 			throw new RuntimeException("testCalcolaCostoTotaleDataCategoria FAILED, calcolo fallito");
 
 		System.out.println(".......testCalcolaCostoTotaleDataCategoria fine: PASSED.............");
+
+	}
+
+	private static void testOrdinePiuRecenteByCategoria(ArticoloService articoloService,
+			CategoriaService categoriaService, OrdineService ordineService) throws Exception {
+
+		System.out.println(".......testOrdinePiuRecenteByCategoria inizio.............");
+
+		// Creo categoria
+		Categoria categoriaPerCalcolo = new Categoria("Recente", "RCT");
+
+		// Inserisco categoria
+		categoriaService.inserisciNuovo(categoriaPerCalcolo);
+
+		// Creo ordine
+		Ordine ordinePiuRecenteSenzaArticoliDellaCategoria = new Ordine("frank", "via fold",
+				new SimpleDateFormat("dd-MM-yyyy").parse("01-03-2022"));
+		Ordine ordinePiuRecenteConArticoliDellaCategoria = new Ordine("Recente", "via dei recenti",
+				new SimpleDateFormat("dd-MM-yyyy").parse("20-02-2022"));
+		Ordine ordineGenericoConCuiConfrontare = new Ordine("Casual", "via random",
+				new SimpleDateFormat("dd-MM-yyyy").parse("01-01-2022"));
+		// Inserisco ordine
+		ordineService.inserisciNuovo(ordinePiuRecenteSenzaArticoliDellaCategoria);
+		ordineService.inserisciNuovo(ordinePiuRecenteConArticoliDellaCategoria);
+		ordineService.inserisciNuovo(ordineGenericoConCuiConfrontare);
+		if (ordinePiuRecenteSenzaArticoliDellaCategoria.getId() == null)
+			throw new RuntimeException("testOrdinePiuRecenteByCategoria FAILED, ordine non inserito");
+
+		// Creo articoli
+		Articolo articoloCategoriaRicercata = new Articolo("telefono", "SamsungS21", 600, new Date());
+
+		Articolo articoloPerCategoriaRicercata2 = new Articolo("telefono", "OnePlus9", 320, new Date());
+
+		Articolo articoloPerCategoriaNonRicercata = new Articolo("videogioco", "genshin", 20, new Date());
+
+		articoloCategoriaRicercata.setOrdine(ordineGenericoConCuiConfrontare);
+		articoloPerCategoriaRicercata2.setOrdine(ordinePiuRecenteConArticoliDellaCategoria);
+		articoloPerCategoriaNonRicercata.setOrdine(ordinePiuRecenteSenzaArticoliDellaCategoria);
+
+		// Inserisco articoli
+		articoloService.inserisciNuovo(articoloCategoriaRicercata);
+		articoloService.inserisciNuovo(articoloPerCategoriaRicercata2);
+		articoloService.inserisciNuovo(articoloPerCategoriaNonRicercata);
+
+		articoloService.aggiungiCategoriaAdArticolo(articoloCategoriaRicercata, categoriaPerCalcolo);
+		articoloService.aggiungiCategoriaAdArticolo(articoloPerCategoriaRicercata2, categoriaPerCalcolo);
+
+		Ordine piuRecente = ordineService.trovaIlPiuRecenteOrdineDiUnaCategoria(categoriaPerCalcolo);
+
+		if (!piuRecente.equals(ordinePiuRecenteConArticoliDellaCategoria)) {
+			throw new RuntimeException("testOrdinePiuRecenteByCategoria FAILED, riscontro non valido");
+		}
+
+		System.out.println(".......testOrdinePiuRecenteByCategoria fine: PASSED.............");
 
 	}
 }

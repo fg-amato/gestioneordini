@@ -297,4 +297,24 @@ public class OrdineServiceImpl implements OrdineService {
 		}
 	}
 
+	@Override
+	public Ordine trovaIlPiuRecenteOrdineDiUnaCategoria(Categoria categoriaInput) throws Exception {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// uso l'injection per il dao
+			ordineDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			return ordineDAO.findOrdineByCategoriaArticoliWithDataSpedizioneMaggiore(categoriaInput);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
 }
