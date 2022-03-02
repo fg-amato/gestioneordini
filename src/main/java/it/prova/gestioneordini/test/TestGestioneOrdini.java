@@ -1,12 +1,11 @@
 package it.prova.gestioneordini.test;
 
 import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.Set;
 
 import it.prova.gestioneordini.dao.EntityManagerUtil;
 import it.prova.gestioneordini.exceptions.OrdineConArticoliException;
 import it.prova.gestioneordini.model.Articolo;
+import it.prova.gestioneordini.model.Categoria;
 import it.prova.gestioneordini.model.Ordine;
 import it.prova.gestioneordini.service.ArticoloService;
 import it.prova.gestioneordini.service.CategoriaService;
@@ -48,6 +47,14 @@ public class TestGestioneOrdini {
 			testUpdateOrdine(ordineServiceInstance);
 
 			System.out.println("Nella tabella ordine ci sono: " + ordineServiceInstance.listAll().size() + " elementi");
+
+			System.out.println(
+					"Nella tabella categoria ci sono: " + categoriaServiceInstance.listAll().size() + " elementi");
+
+			testInserisciCategoria(categoriaServiceInstance);
+
+			System.out.println(
+					"Nella tabella categoria ci sono: " + categoriaServiceInstance.listAll().size() + " elementi");
 		} catch (Throwable e) {
 			e.printStackTrace();
 		} finally {
@@ -163,5 +170,16 @@ public class TestGestioneOrdini {
 			throw new RuntimeException("testUpdateOrdine FAILED, i due oggetti sono diversi");
 
 		System.out.println(".......testUpdateOrdine fine: PASSED.............");
+	}
+
+	private static void testInserisciCategoria(CategoriaService categoriaServiceInstance) throws Exception {
+		System.out.println(".......testInserisciCategoria inizio.............");
+
+		Categoria daInserire = new Categoria("inserito", "INSERT");
+		categoriaServiceInstance.inserisciNuovo(daInserire);
+		if (daInserire.getId() == null)
+			throw new RuntimeException("testInserisciCategoria FAILED ");
+
+		System.out.println(".......testInserisciCategoria fine: PASSED.............");
 	}
 }
