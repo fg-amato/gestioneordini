@@ -2,7 +2,9 @@ package it.prova.gestioneordini.service;
 
 import java.util.List;
 
+import it.prova.gestioneordini.dao.ArticoloDAO;
 import it.prova.gestioneordini.dao.CategoriaDAO;
+import it.prova.gestioneordini.model.Articolo;
 import it.prova.gestioneordini.model.Categoria;
 
 public interface CategoriaService {
@@ -20,4 +22,10 @@ public interface CategoriaService {
 
 	// per injection
 	public void setCategoriaDAO(CategoriaDAO categoriaDAO);
+
+	public void aggiungiArticoloACategoria(Categoria categoriaInstance, Articolo articoloInstance) throws Exception;
+
+	void rimuoviArticoloDaCategoria(Categoria categoriaInstance, Articolo articoloInstance) throws Exception;
+
+	public void setArticoloDAO(ArticoloDAO articoloDAO);
 }

@@ -14,6 +14,7 @@ public class MyServiceFactory {
 			ORDINE_SERVICE_INSTANCE = new OrdineServiceImpl();
 
 		ORDINE_SERVICE_INSTANCE.setOrdineDAO(MyDAOFactory.getOrdineDAOInstance());
+		ORDINE_SERVICE_INSTANCE.setArticoloDAO(MyDAOFactory.getArticoloDAOInstance());
 		return ORDINE_SERVICE_INSTANCE;
 	}
 
@@ -22,6 +23,7 @@ public class MyServiceFactory {
 			ARTICOLO_SERVICE_INSTANCE = new ArticoloServiceImpl();
 
 		ARTICOLO_SERVICE_INSTANCE.setArticoloDAO(MyDAOFactory.getArticoloDAOInstance());
+		ARTICOLO_SERVICE_INSTANCE.setCategoriaDAO(MyDAOFactory.getCategoriaDAOInstance());
 		return ARTICOLO_SERVICE_INSTANCE;
 	}
 
@@ -30,6 +32,7 @@ public class MyServiceFactory {
 			CATEGORIA_SERVICE_INSTANCE = new CategoriaServiceImpl();
 
 		CATEGORIA_SERVICE_INSTANCE.setCategoriaDAO(MyDAOFactory.getCategoriaDAOInstance());
+		CATEGORIA_SERVICE_INSTANCE.setArticoloDAO(MyDAOFactory.getArticoloDAOInstance());
 		return CATEGORIA_SERVICE_INSTANCE;
 	}
 

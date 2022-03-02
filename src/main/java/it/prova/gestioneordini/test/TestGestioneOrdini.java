@@ -57,13 +57,39 @@ public class TestGestioneOrdini {
 			System.out.println(
 					"Nella tabella categoria ci sono: " + categoriaServiceInstance.listAll().size() + " elementi");
 
-			testAggiungiCategoriaAdArticolo(articoloServiceInstance, categoriaServiceInstance);
+			testCollegaCategoriaAdArticolo(articoloServiceInstance, categoriaServiceInstance);
 
 			System.out.println(
 					"Nella tabella categoria ci sono: " + categoriaServiceInstance.listAll().size() + " elementi");
 
 			System.out.println(
 					"Nella tabella articolo ci sono: " + articoloServiceInstance.listAll().size() + " elementi");
+
+			testCollegaArticoloACategoria(articoloServiceInstance, categoriaServiceInstance, ordineServiceInstance);
+
+			System.out.println(
+					"Nella tabella categoria ci sono: " + categoriaServiceInstance.listAll().size() + " elementi");
+
+			System.out.println(
+					"Nella tabella articolo ci sono: " + articoloServiceInstance.listAll().size() + " elementi");
+
+			testScollegaArticoloACategoria(articoloServiceInstance, categoriaServiceInstance, ordineServiceInstance);
+
+			System.out.println(
+					"Nella tabella categoria ci sono: " + categoriaServiceInstance.listAll().size() + " elementi");
+
+			System.out.println(
+					"Nella tabella articolo ci sono: " + articoloServiceInstance.listAll().size() + " elementi");
+
+			testScollegaCategoriaAdArticolo(articoloServiceInstance, categoriaServiceInstance);
+
+			System.out.println(
+					"Nella tabella categoria ci sono: " + categoriaServiceInstance.listAll().size() + " elementi");
+
+			System.out.println(
+					"Nella tabella articolo ci sono: " + articoloServiceInstance.listAll().size() + " elementi");
+
+			testScollegaArticoloAdOrdine(articoloServiceInstance, ordineServiceInstance);
 
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -193,7 +219,7 @@ public class TestGestioneOrdini {
 		System.out.println(".......testInserisciCategoria fine: PASSED.............");
 	}
 
-	private static void testAggiungiCategoriaAdArticolo(ArticoloService articoloServiceInstance,
+	private static void testCollegaCategoriaAdArticolo(ArticoloService articoloServiceInstance,
 			CategoriaService categoriaServiceInstance) throws Exception {
 		System.out.println(".......testAggiungiCategoriaAdArticolo inizio.............");
 
@@ -209,7 +235,7 @@ public class TestGestioneOrdini {
 				.caricaArticoloConCategorie(primoInLista.getId());
 		categoriaServiceInstance.inserisciNuovo(daAggiungere);
 
-		articoloServiceInstance.aggiungiCategoria(primoInListaConCategorieAssociate, daAggiungere);
+		articoloServiceInstance.aggiungiCategoriaAdArticolo(primoInListaConCategorieAssociate, daAggiungere);
 
 		if (daAggiungere.getId() == null)
 			throw new RuntimeException("testAggiungiCategoriaAdArticolo FAILED, categoria non aggiunta nel DB");
@@ -224,4 +250,139 @@ public class TestGestioneOrdini {
 
 		System.out.println(".......testAggiungiCategoriaAdArticolo fine: PASSED.............");
 	}
+
+	private static void testCollegaArticoloACategoria(ArticoloService articoloServiceInstance,
+			CategoriaService categoriaServiceInstance, OrdineService ordineServiceInstance) throws Exception {
+		System.out.println(".......testCollegaArticoloACategoria inizio.............");
+
+		List<Categoria> categorieAttualmenteNelDB = categoriaServiceInstance.listAll();
+		List<Ordine> ordiniAttualmenteNelDB = ordineServiceInstance.listAll();
+		if (categorieAttualmenteNelDB.size() < 1 || ordiniAttualmenteNelDB.size() < 1) {
+			throw new RuntimeException("testCollegaArticoloACategoria FAILED, non ci sono categorie o ordini nel DB");
+		}
+		Categoria primoInLista = categorieAttualmenteNelDB.get(0);
+		Articolo daAggiungere = new Articolo();
+		daAggiungere.setOrdine(ordiniAttualmenteNelDB.get(0));
+
+		Categoria primoInListaConArticoliAssociati = categoriaServiceInstance
+				.caricaCategoriaConArticoli(primoInLista.getId());
+		articoloServiceInstance.inserisciNuovo(daAggiungere);
+
+		categoriaServiceInstance.aggiungiArticoloACategoria(primoInListaConArticoliAssociati, daAggiungere);
+
+		if (daAggiungere.getId() == null)
+			throw new RuntimeException("testCollegaArticoloACategoria FAILED, categoria non aggiunta nel DB");
+
+		Categoria primoInListaConArticoliDopoAggiunzione = categoriaServiceInstance
+				.caricaCategoriaConArticoli(primoInLista.getId());
+
+		if (primoInListaConArticoliAssociati.getArticoli()
+				.size() != primoInListaConArticoliDopoAggiunzione.getArticoli().size() - 1) {
+			throw new RuntimeException("testCollegaArticoloACategoria FAILED, articolo non associato alla categoria");
+		}
+
+		System.out.println(".......testAggiungiArticoloACategoria fine: PASSED.............");
+	}
+
+	private static void testScollegaArticoloACategoria(ArticoloService articoloServiceInstance,
+			CategoriaService categoriaServiceInstance, OrdineService ordineServiceInstance) throws Exception {
+		System.out.println(".......testScollegaArticoloACategoria inizio.............");
+
+		List<Categoria> categorieAttualmenteNelDB = categoriaServiceInstance.listAll();
+		List<Ordine> ordiniAttualmenteNelDB = ordineServiceInstance.listAll();
+		if (categorieAttualmenteNelDB.size() < 1 || ordiniAttualmenteNelDB.size() < 1) {
+			throw new RuntimeException("testScollegaArticoloACategoria FAILED, non ci sono categorie o ordini nel DB");
+		}
+		Categoria primoInLista = categorieAttualmenteNelDB.get(0);
+		Articolo daAggiungere = new Articolo();
+		daAggiungere.setOrdine(ordiniAttualmenteNelDB.get(0));
+
+		// aggiungo l'articolo al db
+		articoloServiceInstance.inserisciNuovo(daAggiungere);
+
+		// associo l'articolo alla categoria
+		categoriaServiceInstance.aggiungiArticoloACategoria(primoInLista, daAggiungere);
+
+		Categoria primoInListaConArticoliAssociati = categoriaServiceInstance
+				.caricaCategoriaConArticoli(primoInLista.getId());
+
+		if (daAggiungere.getId() == null)
+			throw new RuntimeException("testScollegaArticoloACategoria FAILED, articolo non aggiunta nel DB");
+
+		categoriaServiceInstance.rimuoviArticoloDaCategoria(primoInListaConArticoliAssociati, daAggiungere);
+		Categoria primoInListaConArticoliDopoRimozione = categoriaServiceInstance
+				.caricaCategoriaConArticoli(primoInLista.getId());
+
+		if (primoInListaConArticoliAssociati.getArticoli()
+				.size() != primoInListaConArticoliDopoRimozione.getArticoli().size() + 1) {
+			throw new RuntimeException(
+					"testScollegaArticoloACategoria FAILED, articolo non dissociato dalla categoria");
+		}
+
+		System.out.println(".......testScollegaArticoloACategoria fine: PASSED.............");
+	}
+
+	private static void testScollegaCategoriaAdArticolo(ArticoloService articoloServiceInstance,
+			CategoriaService categoriaServiceInstance) throws Exception {
+		System.out.println(".......testScollegaCategoriaAdArticolo inizio.............");
+
+		List<Articolo> articoliAttualmenteNelDB = articoloServiceInstance.listAll();
+
+		if (articoliAttualmenteNelDB.size() < 1) {
+			throw new RuntimeException("testScollegaCategoriaAdArticolo FAILED, non ci sono articoli nel DB");
+		}
+		Articolo primoInLista = articoliAttualmenteNelDB.get(0);
+		Categoria daAggiungere = new Categoria("Farinacei", "FRC");
+
+		categoriaServiceInstance.inserisciNuovo(daAggiungere);
+
+		articoloServiceInstance.aggiungiCategoriaAdArticolo(primoInLista, daAggiungere);
+
+		Articolo primoInListaConCategorieAssociate = articoloServiceInstance
+				.caricaArticoloConCategorie(primoInLista.getId());
+
+		if (daAggiungere.getId() == null)
+			throw new RuntimeException("testScollegaCategoriaAdArticolo FAILED, categoria non aggiunta nel DB");
+
+		articoloServiceInstance.rimuoviCategoriaDaArticolo(daAggiungere, primoInListaConCategorieAssociate);
+		Articolo primoInListaConCategorieDopoRimozione = articoloServiceInstance
+				.caricaArticoloConCategorie(primoInLista.getId());
+
+		if (primoInListaConCategorieAssociate.getCategorie()
+				.size() != primoInListaConCategorieDopoRimozione.getCategorie().size() + 1) {
+			throw new RuntimeException("testScollegaCategoriaAdArticolo FAILED, categoria non associata all'articolo");
+		}
+
+		System.out.println(".......testScollegaCategoriaAdArticolo fine: PASSED.............");
+	}
+
+	private static void testScollegaArticoloAdOrdine(ArticoloService articoloServiceInstance,
+			OrdineService ordineServiceInstance) throws Exception {
+		System.out.println(".......testScollegaArticoloAdOrdine inizio.............");
+
+		// mi creo un ordine inserendolo direttamente su db
+		Ordine ordineNuovo = new Ordine("mario.bianchi", "Via Bianchi 38",
+				new SimpleDateFormat("dd-MM-yyyy").parse("18-07-2021"));
+		ordineServiceInstance.inserisciNuovo(ordineNuovo);
+		if (ordineNuovo.getId() == null)
+			throw new RuntimeException("testScollegaArticoloAdOrdine FAILED, ordine non inserito ");
+
+		Articolo daAggiungere = new Articolo("Aggiunge", "444ADD", 250,
+				new SimpleDateFormat("dd-MM-yyyy").parse("15-05-2019"), ordineNuovo);
+
+		articoloServiceInstance.inserisciNuovo(daAggiungere);
+		ordineServiceInstance.aggiungiArticoloAdOrdine(ordineNuovo, daAggiungere);
+		// per fare il test ricarico interamente l'oggetto e la relazione
+		Ordine ordineReloaded = ordineServiceInstance.caricaOrdineConArticoli(ordineNuovo.getId());
+		if (ordineReloaded.getArticoli().size() != 1)
+			throw new RuntimeException("testScollegaArticoloAdOrdine FAILED, articolo non aggiunto");
+
+		ordineServiceInstance.rimuoviArticoloDaOrdine(ordineNuovo, daAggiungere);
+
+		ordineReloaded = ordineServiceInstance.caricaOrdineConArticoli(ordineNuovo.getId());
+		if (ordineReloaded.getArticoli().size() != 0)
+			throw new RuntimeException("testScollegaArticoloAdOrdine FAILED, articolo non rimosso");
+		System.out.println(".......testScollegaArticoloAdOrdine fine: PASSED.............");
+	}
+
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import it.prova.gestioneordini.dao.ArticoloDAO;
+import it.prova.gestioneordini.dao.CategoriaDAO;
 import it.prova.gestioneordini.dao.EntityManagerUtil;
 import it.prova.gestioneordini.exceptions.ArticoloConCategorieException;
 import it.prova.gestioneordini.exceptions.ArticoloNonAssociatoAOrdineException;
@@ -13,6 +14,7 @@ import it.prova.gestioneordini.model.Categoria;
 
 public class ArticoloServiceImpl implements ArticoloService {
 	private ArticoloDAO articoloDAO;
+	private CategoriaDAO categoriaDAO;
 
 	@Override
 	public List<Articolo> listAll() throws Exception {
@@ -113,6 +115,8 @@ public class ArticoloServiceImpl implements ArticoloService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
 		}
 	}
 
@@ -142,7 +146,7 @@ public class ArticoloServiceImpl implements ArticoloService {
 	}
 
 	@Override
-	public void aggiungiCategoria(Articolo articoloInstance, Categoria categoriaInstance) throws Exception {
+	public void aggiungiCategoriaAdArticolo(Articolo articoloInstance, Categoria categoriaInstance) throws Exception {
 		EntityManager entityManager = EntityManagerUtil.getEntityManager();
 
 		try {
@@ -174,6 +178,41 @@ public class ArticoloServiceImpl implements ArticoloService {
 		} finally {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
+	}
+
+	@Override
+	public void rimuoviCategoriaDaArticolo(Categoria categoriaInstance, Articolo articoloInstance) throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// questo è come il MyConnection.getConnection()
+			entityManager.getTransaction().begin();
+			categoriaDAO.setEntityManager(entityManager);
+			articoloDAO.setEntityManager(entityManager);
+
+			articoloInstance = articoloDAO.get(articoloInstance.getId());
+			categoriaInstance = categoriaDAO.get(categoriaInstance.getId());
+
+			articoloInstance.removeFromCategorie(categoriaInstance);
+			// l'update non viene richiamato a mano in quanto
+			// risulta automatico, infatti il contesto di persistenza
+			// rileva che cdInstance ora è dirty vale a dire che una sua
+			// proprieta ha subito una modifica (vale anche per i Set ovviamente)
+			// inoltre se risultano già collegati lo capisce automaticamente grazie agli id
+
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
+	@Override
+	public void setCategoriaDAO(CategoriaDAO categoriaDAO) {
+		this.categoriaDAO = categoriaDAO;
 	}
 
 }

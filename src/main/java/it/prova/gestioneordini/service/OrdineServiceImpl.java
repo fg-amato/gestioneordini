@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import it.prova.gestioneordini.dao.ArticoloDAO;
 import it.prova.gestioneordini.dao.EntityManagerUtil;
 import it.prova.gestioneordini.dao.OrdineDAO;
 import it.prova.gestioneordini.exceptions.OrdineConArticoliException;
@@ -12,6 +13,7 @@ import it.prova.gestioneordini.model.Ordine;
 
 public class OrdineServiceImpl implements OrdineService {
 	private OrdineDAO ordineDAO;
+	private ArticoloDAO articoloDAO;
 
 	@Override
 	public List<Ordine> listAll() throws Exception {
@@ -127,6 +129,8 @@ public class OrdineServiceImpl implements OrdineService {
 			entityManager.getTransaction().rollback();
 			e.printStackTrace();
 			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
 		}
 	}
 
@@ -186,6 +190,37 @@ public class OrdineServiceImpl implements OrdineService {
 		} finally {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
+	}
+
+	@Override
+	public void rimuoviArticoloDaOrdine(Ordine ordineEsistente, Articolo articoloInstance) throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+		try {
+
+			entityManager.getTransaction().begin();
+
+			// inietto la connection nel dao
+			ordineDAO.setEntityManager(entityManager);
+			articoloDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			articoloDAO.delete(articoloInstance);
+
+			entityManager.getTransaction().commit();
+
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+
+	}
+
+	@Override
+	public void setArticoloDAO(ArticoloDAO articoloDAO) {
+		this.articoloDAO = articoloDAO;
 	}
 
 }

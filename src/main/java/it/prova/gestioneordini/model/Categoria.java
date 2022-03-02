@@ -99,7 +99,7 @@ public class Categoria {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(articoli, codice, descrizione, id);
+		return Objects.hash(codice, descrizione, id);
 	}
 
 	@Override
@@ -109,8 +109,8 @@ public class Categoria {
 		if (!(obj instanceof Categoria))
 			return false;
 		Categoria other = (Categoria) obj;
-		return Objects.equals(articoli, other.articoli) && Objects.equals(codice, other.codice)
-				&& Objects.equals(descrizione, other.descrizione) && Objects.equals(id, other.id);
+		return Objects.equals(codice, other.codice) && Objects.equals(descrizione, other.descrizione)
+				&& Objects.equals(id, other.id);
 	}
 
 }
