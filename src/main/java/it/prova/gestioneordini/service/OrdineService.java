@@ -24,6 +24,8 @@ public interface OrdineService {
 
 	public void rimuoviArticoloDaOrdine(Ordine ordineEsistente, Articolo articoloInstance) throws Exception;
 
+	public void rimozioneForzata(Ordine ordineEsistente) throws Exception;
+
 	// per injection
 	public void setOrdineDAO(OrdineDAO ordineDAO);
 

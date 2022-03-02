@@ -91,6 +91,24 @@ public class TestGestioneOrdini {
 
 			testScollegaArticoloAdOrdine(articoloServiceInstance, ordineServiceInstance);
 
+			System.out.println(
+					"Nella tabella categoria ci sono: " + categoriaServiceInstance.listAll().size() + " elementi");
+
+			System.out.println(
+					"Nella tabella articolo ci sono: " + articoloServiceInstance.listAll().size() + " elementi");
+
+			System.out.println("Nella tabella ordine ci sono: " + ordineServiceInstance.listAll().size() + " elementi");
+
+			testRimozioneForzata(articoloServiceInstance, categoriaServiceInstance, ordineServiceInstance);
+
+			System.out.println(
+					"Nella tabella categoria ci sono: " + categoriaServiceInstance.listAll().size() + " elementi");
+
+			System.out.println(
+					"Nella tabella articolo ci sono: " + articoloServiceInstance.listAll().size() + " elementi");
+
+			System.out.println("Nella tabella ordine ci sono: " + ordineServiceInstance.listAll().size() + " elementi");
+
 		} catch (Throwable e) {
 			e.printStackTrace();
 		} finally {
@@ -383,6 +401,36 @@ public class TestGestioneOrdini {
 		if (ordineReloaded.getArticoli().size() != 0)
 			throw new RuntimeException("testScollegaArticoloAdOrdine FAILED, articolo non rimosso");
 		System.out.println(".......testScollegaArticoloAdOrdine fine: PASSED.............");
+	}
+
+	private static void testRimozioneForzata(ArticoloService articoloServiceInstance,
+			CategoriaService categoriaServiceInstance, OrdineService ordineServiceInstance) throws Exception {
+		System.out.println(".......testRimozioneForzata inizio.............");
+
+		Ordine daRimuovere = new Ordine("Piero Neri", "Via Roma 37",
+				new SimpleDateFormat("dd-MM-yyyy").parse("20-01-2022"));
+		ordineServiceInstance.inserisciNuovo(daRimuovere);
+
+		Articolo articoloDaRimuovere = new Articolo("meme", "32321", 10,
+				new SimpleDateFormat("dd-MM-yyyy").parse("15-05-2019"), daRimuovere);
+
+		articoloServiceInstance.inserisciNuovo(articoloDaRimuovere);
+
+		ordineServiceInstance.aggiungiArticoloAdOrdine(daRimuovere, articoloDaRimuovere);
+
+		Categoria categoriaArticoloDaRimuovere = new Categoria("Mi rimuovi", "RMV");
+
+		categoriaServiceInstance.inserisciNuovo(categoriaArticoloDaRimuovere);
+
+		articoloServiceInstance.aggiungiCategoriaAdArticolo(articoloDaRimuovere, categoriaArticoloDaRimuovere);
+		Long idOrdineNuovo = daRimuovere.getId();
+		ordineServiceInstance.rimozioneForzata(daRimuovere);
+
+		if (ordineServiceInstance.caricaSingoloElemento(idOrdineNuovo) != null) {
+			throw new RuntimeException("testRimozioneForzata FAILED, ordine non rimosso");
+		}
+
+		System.out.println(".......testRimozioneForzata fine: PASSED.............");
 	}
 
 }
