@@ -1,6 +1,7 @@
 package it.prova.gestioneordini.test;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import it.prova.gestioneordini.dao.EntityManagerUtil;
@@ -108,6 +109,11 @@ public class TestGestioneOrdini {
 					"Nella tabella articolo ci sono: " + articoloServiceInstance.listAll().size() + " elementi");
 
 			System.out.println("Nella tabella ordine ci sono: " + ordineServiceInstance.listAll().size() + " elementi");
+
+			testFindAllCategories(articoloServiceInstance, categoriaServiceInstance, ordineServiceInstance);
+
+			testFindAllOrdiniWithCategoriaInput(articoloServiceInstance, categoriaServiceInstance,
+					ordineServiceInstance);
 
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -433,4 +439,88 @@ public class TestGestioneOrdini {
 		System.out.println(".......testRimozioneForzata fine: PASSED.............");
 	}
 
+	private static void testFindAllCategories(ArticoloService articoloServiceInstance,
+			CategoriaService categoriaServiceInstance, OrdineService ordineServiceInstance) throws Exception {
+		System.out.println(".......testFindAllCategories inizio.............");
+
+		Ordine ordine = new Ordine("Piero Neri", "Via Roma 37", new SimpleDateFormat("dd-MM-yyyy").parse("20-01-2022"));
+		ordineServiceInstance.inserisciNuovo(ordine);
+
+		Articolo articoloConUnaCategoria = new Articolo("meme", "32321", 10,
+				new SimpleDateFormat("dd-MM-yyyy").parse("15-05-2019"), ordine);
+		Articolo articoloMultiCategoria = new Articolo("pippo", "2222", 15, new Date(), ordine);
+
+		articoloServiceInstance.inserisciNuovo(articoloConUnaCategoria);
+		articoloServiceInstance.inserisciNuovo(articoloMultiCategoria);
+
+		ordineServiceInstance.aggiungiArticoloAdOrdine(ordine, articoloConUnaCategoria);
+		ordineServiceInstance.aggiungiArticoloAdOrdine(ordine, articoloMultiCategoria);
+
+		Categoria categoriaArticoloSingolaCategoria = new Categoria("Mi rimuovi", "RMV");
+
+		Categoria categoriaArticoloMultiCategorie = new Categoria("Mi aggiungi", "ADD");
+
+		categoriaServiceInstance.inserisciNuovo(categoriaArticoloSingolaCategoria);
+		categoriaServiceInstance.inserisciNuovo(categoriaArticoloMultiCategorie);
+
+		articoloServiceInstance.aggiungiCategoriaAdArticolo(articoloMultiCategoria, categoriaArticoloSingolaCategoria);
+		articoloServiceInstance.aggiungiCategoriaAdArticolo(articoloMultiCategoria, categoriaArticoloMultiCategorie);
+		articoloServiceInstance.aggiungiCategoriaAdArticolo(articoloConUnaCategoria, categoriaArticoloSingolaCategoria);
+
+		if (ordineServiceInstance.trovaCategorieDistinteDegliArticoliDiUnOrdine(ordine).size() != 2) {
+			throw new RuntimeException("testFindAllCategories FAILED, riscontro non valido");
+		}
+
+		System.out.println(".......testFindAllCategories fine: PASSED.............");
+	}
+
+	private static void testFindAllOrdiniWithCategoriaInput(ArticoloService articoloServiceInstance,
+			CategoriaService categoriaServiceInstance, OrdineService ordineServiceInstance) throws Exception {
+		System.out.println(".......testFindAllOrdiniWithCategoriaInput inizio.............");
+
+		Ordine ordinePieroNeri = new Ordine("Piero Neri", "Via Roma 37",
+				new SimpleDateFormat("dd-MM-yyyy").parse("20-01-2022"));
+		ordineServiceInstance.inserisciNuovo(ordinePieroNeri);
+
+		Ordine ordineMarioBianchi = new Ordine("mario.bianchi", "Via Bianchi 38",
+				new SimpleDateFormat("dd-MM-yyyy").parse("18-07-2021"));
+		ordineServiceInstance.inserisciNuovo(ordineMarioBianchi);
+
+		Ordine ordineFrancoFranchi = new Ordine("Franco Franchi", "Via Rossi 38",
+				new SimpleDateFormat("dd-MM-yyyy").parse("05-03-2021"));
+		ordineServiceInstance.inserisciNuovo(ordineFrancoFranchi);
+
+		Articolo articoloPieroNeri = new Articolo("meme", "32321", 10,
+				new SimpleDateFormat("dd-MM-yyyy").parse("15-05-2019"), ordinePieroNeri);
+		Articolo articoloMarioBianchi = new Articolo("pippo", "2222", 15, new Date(), ordineMarioBianchi);
+		Articolo articoloFrancoFranchi = new Articolo("ciccio", "1252", 27, new Date(), ordineFrancoFranchi);
+
+		articoloServiceInstance.inserisciNuovo(articoloPieroNeri);
+		articoloServiceInstance.inserisciNuovo(articoloMarioBianchi);
+		articoloServiceInstance.inserisciNuovo(articoloFrancoFranchi);
+
+		ordineServiceInstance.aggiungiArticoloAdOrdine(ordinePieroNeri, articoloPieroNeri);
+		ordineServiceInstance.aggiungiArticoloAdOrdine(ordineMarioBianchi, articoloMarioBianchi);
+		ordineServiceInstance.aggiungiArticoloAdOrdine(ordineFrancoFranchi, articoloFrancoFranchi);
+
+		Categoria categoriaArticoloPieroNeri = new Categoria("Mi rimuovi", "RMV");
+
+		Categoria categoriaArticoloPieroNeriEMarioBianchi = new Categoria("Mi aggiungi", "ADD");
+
+		categoriaServiceInstance.inserisciNuovo(categoriaArticoloPieroNeri);
+		categoriaServiceInstance.inserisciNuovo(categoriaArticoloPieroNeriEMarioBianchi);
+
+		articoloServiceInstance.aggiungiCategoriaAdArticolo(articoloPieroNeri, categoriaArticoloPieroNeri);
+		articoloServiceInstance.aggiungiCategoriaAdArticolo(articoloPieroNeri, categoriaArticoloPieroNeriEMarioBianchi);
+		articoloServiceInstance.aggiungiCategoriaAdArticolo(articoloMarioBianchi,
+				categoriaArticoloPieroNeriEMarioBianchi);
+
+		if (ordineServiceInstance
+				.trovaTuttiGliOrdiniChePossiedonoUnArticoloAventeCategoria(categoriaArticoloPieroNeriEMarioBianchi)
+				.size() != 2) {
+			throw new RuntimeException("testFindAllOrdiniWithCategoriaInput FAILED, riscontro non valido");
+		}
+
+		System.out.println(".......testFindAllOrdiniWithCategoriaInput fine: PASSED.............");
+	}
 }
