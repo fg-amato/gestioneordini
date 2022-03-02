@@ -1,6 +1,7 @@
 package it.prova.gestioneordini.test;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import it.prova.gestioneordini.dao.EntityManagerUtil;
 import it.prova.gestioneordini.exceptions.OrdineConArticoliException;
@@ -55,6 +56,15 @@ public class TestGestioneOrdini {
 
 			System.out.println(
 					"Nella tabella categoria ci sono: " + categoriaServiceInstance.listAll().size() + " elementi");
+
+			testAggiungiCategoriaAdArticolo(articoloServiceInstance, categoriaServiceInstance);
+
+			System.out.println(
+					"Nella tabella categoria ci sono: " + categoriaServiceInstance.listAll().size() + " elementi");
+
+			System.out.println(
+					"Nella tabella articolo ci sono: " + articoloServiceInstance.listAll().size() + " elementi");
+
 		} catch (Throwable e) {
 			e.printStackTrace();
 		} finally {
@@ -181,5 +191,37 @@ public class TestGestioneOrdini {
 			throw new RuntimeException("testInserisciCategoria FAILED ");
 
 		System.out.println(".......testInserisciCategoria fine: PASSED.............");
+	}
+
+	private static void testAggiungiCategoriaAdArticolo(ArticoloService articoloServiceInstance,
+			CategoriaService categoriaServiceInstance) throws Exception {
+		System.out.println(".......testAggiungiCategoriaAdArticolo inizio.............");
+
+		List<Articolo> articoliAttualmenteNelDB = articoloServiceInstance.listAll();
+
+		if (articoliAttualmenteNelDB.size() < 1) {
+			throw new RuntimeException("testAggiungiCategoriaAdArticolo FAILED, non ci sono articoli nel DB");
+		}
+		Articolo primoInLista = articoliAttualmenteNelDB.get(0);
+		Categoria daAggiungere = new Categoria("Latticini", "LTT");
+
+		Articolo primoInListaConCategorieAssociate = articoloServiceInstance
+				.caricaArticoloConCategorie(primoInLista.getId());
+		categoriaServiceInstance.inserisciNuovo(daAggiungere);
+
+		articoloServiceInstance.aggiungiCategoria(primoInListaConCategorieAssociate, daAggiungere);
+
+		if (daAggiungere.getId() == null)
+			throw new RuntimeException("testAggiungiCategoriaAdArticolo FAILED, categoria non aggiunta nel DB");
+
+		Articolo primoInListaConCategorieDopoAggiunzione = articoloServiceInstance
+				.caricaArticoloConCategorie(primoInLista.getId());
+
+		if (primoInListaConCategorieAssociate.getCategorie()
+				.size() != primoInListaConCategorieDopoAggiunzione.getCategorie().size() - 1) {
+			throw new RuntimeException("testAggiungiCategoriaAdArticolo FAILED, categoria non associata all'articolo");
+		}
+
+		System.out.println(".......testAggiungiCategoriaAdArticolo fine: PASSED.............");
 	}
 }
