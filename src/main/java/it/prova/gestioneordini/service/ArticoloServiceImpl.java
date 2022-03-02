@@ -215,4 +215,24 @@ public class ArticoloServiceImpl implements ArticoloService {
 		this.categoriaDAO = categoriaDAO;
 	}
 
+	@Override
+	public Long calcolaPrezzoArticoli(Categoria categoriaInstance) throws Exception {
+		// questo è come una connection
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// uso l'injection per il dao
+			articoloDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			return articoloDAO.calculatePrezzoArticoliWithCategoria(categoriaInstance);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
 }

@@ -115,6 +115,9 @@ public class TestGestioneOrdini {
 			testFindAllOrdiniWithCategoriaInput(articoloServiceInstance, categoriaServiceInstance,
 					ordineServiceInstance);
 
+			testCalcolaCostoTotaleDataCategoria(articoloServiceInstance, categoriaServiceInstance,
+					ordineServiceInstance);
+
 		} catch (Throwable e) {
 			e.printStackTrace();
 		} finally {
@@ -522,5 +525,68 @@ public class TestGestioneOrdini {
 		}
 
 		System.out.println(".......testFindAllOrdiniWithCategoriaInput fine: PASSED.............");
+	}
+
+	private static void testCalcolaCostoTotaleDataCategoria(ArticoloService articoloService,
+			CategoriaService categoriaService, OrdineService ordineService) throws Exception {
+
+		System.out.println(".......testCalcolaCostoTotaleDataCategoria inizio.............");
+
+		// Creo categoria
+		Categoria categoriaPerCalcolo = new Categoria("trophy", "trophy07");
+		if (categoriaPerCalcolo.getId() != null)
+			throw new RuntimeException("testCalcolaCostoTotaleDataCategoria FAILED, categoria non inserita");
+
+		// Inserisco categoria
+		categoriaService.inserisciNuovo(categoriaPerCalcolo);
+
+		// Creo ordine
+		Ordine ordinePerCalcolo = new Ordine("irene", "via amico", new Date());
+		if (ordinePerCalcolo.getId() != null)
+			throw new RuntimeException("testCalcolaCostoTotaleDataCategoria FAILED, ordine già sul DB");
+
+		// Inserisco ordine
+		ordineService.inserisciNuovo(ordinePerCalcolo);
+		if (ordinePerCalcolo.getId() == null)
+			throw new RuntimeException("testCalcolaCostoTotaleDataCategoria FAILED, ordine non inserito");
+
+		// Creo articoli
+		Articolo articoloPerRicerca = new Articolo("videogioco", "halo", 70, new Date());
+		if (articoloPerRicerca.getId() != null)
+			throw new RuntimeException(
+					"testCalcolaCostoTotaleDataCategoria FAILED, articolo già registrato su database");
+
+		Articolo articoloPerRicerca1 = new Articolo("videogioco", "destiny", 60, new Date());
+		if (articoloPerRicerca.getId() != null)
+			throw new RuntimeException(
+					"testCalcolaCostoTotaleDataCategoria FAILED, articolo già registrato su database");
+
+		Articolo articoloPerRicerca2 = new Articolo("videogioco", "genshin", 20, new Date());
+		if (articoloPerRicerca.getId() != null)
+			throw new RuntimeException(
+					"testCalcolaCostoTotaleDataCategoria FAILED, articolo già registrato su database");
+		articoloPerRicerca.setOrdine(ordinePerCalcolo);
+		articoloPerRicerca1.setOrdine(ordinePerCalcolo);
+		articoloPerRicerca2.setOrdine(ordinePerCalcolo);
+
+		// Inserisco articoli
+		articoloService.inserisciNuovo(articoloPerRicerca);
+		articoloService.inserisciNuovo(articoloPerRicerca1);
+		articoloService.inserisciNuovo(articoloPerRicerca2);
+
+		articoloService.aggiungiCategoriaAdArticolo(articoloPerRicerca, categoriaPerCalcolo);
+		articoloService.aggiungiCategoriaAdArticolo(articoloPerRicerca1, categoriaPerCalcolo);
+		articoloService.aggiungiCategoriaAdArticolo(articoloPerRicerca2, categoriaPerCalcolo);
+
+		if (articoloPerRicerca.getId() == null || articoloPerRicerca1.getId() == null
+				|| articoloPerRicerca2.getId() == null)
+			throw new RuntimeException("testCalcolaCostoTotaleDataCategoria FAILED, articolo non inserito sul DB");
+
+		Long totaleCosto = articoloService.calcolaPrezzoArticoli(categoriaPerCalcolo);
+		if (totaleCosto % 150 != 0)
+			throw new RuntimeException("testCalcolaCostoTotaleDataCategoria FAILED, calcolo fallito");
+
+		System.out.println(".......testCalcolaCostoTotaleDataCategoria fine: PASSED.............");
+
 	}
 }

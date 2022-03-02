@@ -24,6 +24,8 @@ public interface ArticoloService {
 
 	void rimuoviCategoriaDaArticolo(Categoria categoriaInstance, Articolo articoloInstance) throws Exception;
 
+	public Long calcolaPrezzoArticoli(Categoria categoriaInstance) throws Exception;
+
 	// per injection
 	public void setArticoloDAO(ArticoloDAO articoloDAO);
 
